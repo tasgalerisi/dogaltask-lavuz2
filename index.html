@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Doğal Taşlar Kataloğu</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f9f9f9;
+    padding: 20px;
+  }
+  #searchBox {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    margin-bottom: 25px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+  #stonesContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+  }
+  .stone {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 7px rgba(0,0,0,0.1);
+    width: 230px;
+    padding: 15px;
+    box-sizing: border-box;
+    transition: transform 0.2s ease;
+  }
+  .stone:hover {
+    transform: scale(1.03);
+  }
+  .stone img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 8px;
+    background: #f0f0f0;
+  }
+  .stone-name {
+    font-weight: 700;
+    font-size: 20px;
+    margin-top: 12px;
+    margin-bottom: 10px;
+    color: #333;
+  }
+  .meanings {
+    list-style-type: disc;
+    padding-left: 18px;
+    color: #555;
+    font-size: 14px;
+    margin: 0;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>
+</head>
+<body>
+
+<input type="text" id="searchBox" placeholder="Taş veya özellik ara..." oninput="filterStones()" />
+
+<div id="stonesContainer"></div>
+
+<script>
+const stoneData = [
+  { name: "Akik", img: "img/akik.jpg", meanings: ["Sosyallik", "Üretkenlik", "Nazara iyi gelir", "Hastalıklardan korunma", "Pozitif enerji"] },
+  { name: "Amazonit", img: "img/amazonit.jpg", meanings: ["Farklı bakış açısı", "Yüksek yetenek", "Öfke kontrolü", "Uyumluluk", "Üretkenlik"] },
+  { name: "Ametrin", img: "img/ametrin.jpg", meanings: ["Stresi dağıtır", "İlhamı arttırır", "Öz sorgulama", "Ferahlık", "Konsantrasyon"] },
+  { name: "Anyolit", img: "img/anyolite.jpg", meanings: ["Güçlü iyileştirici", "Dayanıklılık", "İlham", "Cinsel istek", "Ruhsal sağlık"] },
+  { name: "Aragonit", img: "img/aragonit.jpg", meanings: ["Dengeliyeicilik", "Ruh ve beden uyumu", "Gerçekleri görme", "Şifa ve anlayış", "Kemik gelişimi"] },
+  { name: "Ay Taşı", img: "img/aytasi.jpg", meanings: ["İştah kontrolü", "Yüksek umut", "Dişil enerji", "Regl düzenleme", "Menopoza faydalı"] },
+  { name: "Bronzit", img: "img/bronzit.jpg", meanings: ["Negatif enerjiyi alır", "Kendine inanma", "Farkındalık", "Kararlılık", "Motivasyon"] },
+  { name: "Dumanlı Kuvars", img: "img/dumanlikuvars.jpg", meanings: ["Toleransı arttırma", "Zorlukları aşma", "Korkuyu yenme", "Net algılama", "Depresyonu önler"] },
+  { name: "Florit", img: "img/florit.jpg", meanings: ["Konsantrasyon", "İletişimde dinlenme", "Güçlü ilişkiler", "Objektif bakış", "Yetenekleri arttırır"] },
+  { name: "Akuamarin", img: "img/akuamarin.jpg", meanings: ["Negatifliği emer", "Yüksek enerji", "Cesaret, özgüven", "Tembelliği giderir", "İletişimde kolaylık"] },
+  { name: "Ametist", img: "img/ametist.jpg", meanings: ["Kadınsal enerji", "Güçlü bağışıklık", "Sakinleştirici", "Güzel uyku", "Rahatlık", "Radyasyonu emer"] },
+  { name: "Anjelit", img: "img/anjelit.jpg", meanings: ["Evrensel huzur", "Ruhsal ferahlık", "Bilinçli hal", "Merhametli olmak", "İç huzur"] },
+  { name: "Apatit", img: "img/apatit.jpg", meanings: ["Tokluk hissi", "Berrak zihin", "Hızlı öğrenme", "Algıları açar", "Güçlü beden"] },
+  { name: "Aventürin", img: "img/aventurin.jpg", meanings: ["Cilt güzelliği", "Kalbi korur", "Huzursuzluğu giderir", "Nazara iyi gelir"] },
+  { name: "Azurit", img: "img/azurit.jpg", meanings: ["Sosyal hayat", "Kibiri giderir", "Adaptasyon", "Uyumluluk", "Zindelik", "Göz sağlığı"] },
+  { name: "Güneş Taşı", img: "img/gunes_tasi.jpg", meanings: ["Geçmişten kopma", "Hayırseverlik", "Hayattan keyif almayı sağlar", "Liderlik ruhu"] },
+  { name: "İnci", img: "img/inci.jpg", meanings: ["Dişil enerji", "Kaygıyı alır", "İştahı düzenler", "Bedenen hafiflik", "Zihnen ferahlamadır"] },
+  { name: "Jasper", img: "img/jasper.jpg", meanings: ["Organize etme", "Umutla bakma", "Enerjiyi tazeler", "Cinsel güç", "Hoşnutluk"] },
+  { name: "Kan Taşı", img: "img/kantasi.jpg", meanings: ["Enerjik beden", "Damar sağlığı", "Kalp sağlığı", "Kansızlığa iyi gelir", "Zihni canlandırır"] },
+  { name: "Kaplan Gözü", img: "img/kaplangozu.jpg", meanings: ["Baskın karakter", "Ticarette atılım", "Berrak bakış", "İrade gücü", "Girişkenlik"] },
+  { name: "Kedi Gözü", img: "img/kedigozu.jpg", meanings: ["Göz sağlığı", "İyi şans", "Huzur, mutluluk", "Bolluk, zenginlik", "Azim, başarı"] },
+  { name: "Kristal Kuvars", img: "img/kristalkuvars.jpg", meanings: ["Çiftler arasında denge ve uyum", "Manevi huzur", "Dayanıklılık", "Fiziksel güç"] },
+  { name: "Krizopras", img: "img/krizopras.jpg", meanings: ["Refah, zenginlik", "Net kararlar", "Girişimcilik", "Kıvrak zeka", "Açık fikirlilik"] },
+  { name: "Havlit", img: "img/havlit.jpg", meanings: ["Temiz bakış açısı", "Uyku sorunları", "Stresi azaltır", "Zihinde ferahlık", "Sanatsal bakış", "Konsantrasyon"] },
+  { name: "Hematit", img: "img/hematit.jpg", meanings: ["Özgün düşünme", "Damar sağlığı", "Ruhsal şifa", "Fiziksel denge", "Çözüm odaklı olma"] },
+  { name: "Iyolit", img: "img/iyolit.jpg", meanings: ["Öz saygıyı arttırır", "Temiz bakış açısı", "Güçlü sezgiler"] },
+  { name: "Kalsit", img: "img/kalsit.jpg", meanings: ["Güçlü öğrenme", "Analitik zeka", "Konsantrasyon", "Kemik gelişimi", "Stresi alır"] },
+  { name: "Kehribar", img: "img/kehribar.jpg", meanings: ["Bebek diş ağrısı ve gaz sancısı", "Tiroid ve guatr", "Astım tedavisi", "Baş ve omuz ağrısı"] },
+  { name: "Krizokkol", img: "img/krizokkol.jpg", meanings: ["Merak uyandırır", "Öğrenme isteği", "Hafıza kuvveti", "Korkuları yenme", "Kariyer girişimi"] },
+  { name: "Kunzit", img: "img/kunzit.jpg", meanings: ["Kadınsal enerji", "Gönül yaraları", "Kadın hastalıkları", "Çift uyumu", "Cinsel sağlık"] },
+  { name: "Labradorit", img: "img/labradorit.jpg", meanings: ["Kaygı bozukluğu", "Güçlü sezgiler", "Ruhsal sağlık ve şifa", "Maneviyat", "Rahat uyku"] },
+  { name: "Lapis Lazuli", img: "img/lapislazuli.jpg", meanings: ["Güçlü hafıza", "Berrak bilinç", "Etkili konuşma", "Sağlıklı uyku", "Konsantrasyon"] },
+  { name: "Lav Taşı", img: "img/lavtasi.jpg", meanings: ["Öfke kontrolü", "Hayatta denge", "Stresi emer", "Ani çıkışları önler", "Atılganlık"] },
+  { name: "Malakit", img: "img/malakit.jpg", meanings: ["Enerjiyi yeniler", "Denge, sevgi", "Radyasyonu emer", "Ticari başarı", "Değişime açıklık", "Ruhsal dönüşüm"] },
+  { name: "Morganit", img: "img/morganit.jpg", meanings: ["Umut ve sevgi", "Berrak bakış açısı", "İletişim yeteneği", "Empati", "Kalp koruması"] },
+  { name: "Obsidyen", img: "img/obsidyen.jpg", meanings: ["Öfke kontrolü", "Kafa karışıklığı", "Olgunluk", "Dengeli bir hayat"] },
+  { name: "Pembe Kuvars", img: "img/pembekuvars.jpg", meanings: ["Koşulsuz sevgi", "Romantik ilişki", "Aşk ve tutku", "Öz sevgi", "Güzellik"] },
+  { name: "Lal Garnet", img: "img/lalgarnet.jpg", meanings: ["İlişkileri onarır", "Sağlıklı gebelik", "Yaşam sevinci", "Cinsel istek", "İç güzellik", "Hormonal denge"] },
+  { name: "Larimar", img: "img/larimar.jpg", meanings: ["Eril ve dişil denge", "Rahatlık verir", "Kafa dinginliği", "Ruh ikizini bulma", "İletişim"] },
+  { name: "Lepidolit", img: "img/lepidolit.jpg", meanings: ["Bağımlılıklardan kurtulma", "Duygu ve zihin bütünlüğü", "Algıyı açma"] },
+  { name: "Mercan", img: "img/mercan.jpg", meanings: ["Sara hastalığı", "Eklem ağrısı", "Romatizma", "Şişliklere iyi gelir", "Fikirsel uyuşma"] },
+  { name: "Necef", img: "img/necef.jpg", meanings: ["Radyasyonu emer", "Hızlı düşünme", "Ruhsal kuvvet", "Baş ağrısı", "Keskin zeka"] },
+  { name: "Opal", img: "img/opal.jpg", meanings: ["Refah ve bereket", "Duru net düşünce", "Sanatsal bakış açısı", "Umut ve şefkat", "Özgüven arttırır"] },
+  { name: "Pirit", img: "img/pirit.jpg", meanings: ["Bolluk, bereket", "Gerçekliği görme", "Güçlü öğrenme", "Hızlı hatırlama", "Negatifliği emer"] },
+  { name: "Prenhit", img: "img/prenhit.jpg", meanings: ["Kabusu önler", "Yağ yakıcı", "Düzgün hayat", "Koşulsuz aşk", "Hayal gücü"] },
+  { name: "Rudraksha", img: "img/rudraksha.jpg", meanings: ["Ruhsal şifa", "Güzel konuşma", "Huzurlu olma", "Yaşam gücü", "Doğurganlık"] },
+  { name: "Rodokrosit", img: "img/rodokrosit.jpg", meanings: ["Denge ve aşk", "Hayatta yenilik", "Pozitif yaklaşım", "Yeni görünüş", "Üretkenlik", "Panik atak"] },
+  { name: "Safir", img: "img/safir.jpg", meanings: ["Bilgece bakış", "Konsantrasyon", "Refah, bereket", "Olgunluk, sadakat", "Evlilik ve aşkı güçlendirir"] },
+  { name: "Selenit", img: "img/selanit.jpg", meanings: ["Genel sağlık", "Gerçekleri görme, anlama becerisi", "Huzurlu hisler", "Hücre yenileme", "Topraklama"] },
+  { name: "Sitrin", img: "img/sitrin.jpg", meanings: ["Bolluk, bereket", "Öğrenme arzusu", "Eğlenceli yaşam", "Yüksek itibar", "Değişim gücü"] },
+  { name: "Tüccar Taşı", img: "img/sungit.jpg", meanings: ["Radyasyonu emer", "Pratik çözümler", "Negatif enerjiyi alır", "Uyuma sağlama", "Antibakteriyel"] },
+  { name: "Turmalin", img: "img/turmalin.jpg", meanings: ["Yüksek merhamet", "Hormon dengesi", "Fiziksel beceri", "Kendini tanıma", "Tolerans"] },
+  { name: "Terahertz", img: "img/terahertz.jpg", meanings: ["Saniyede 112 milyon titreşim", "Yüksek enerji", "Hücre yenileme", "Sağlıklı cilt", "Zihinsel netlik"] },
+  { name: "Unakit", img: "img/unakit.jpg", meanings: ["Hamilelik süreci", "Duygusal denge", "Manevi inanç", "Rahatsızlık önleyici"] },
+  { name: "Rodonit", img: "img/rodonit.jpg", meanings: ["Kendine güvenme", "Sakin kalma", "Yıpranmayı ve yorulmayı önler", "Panik atağı giderir"] },
+  { name: "Yeşim", img: "img/yesim.jpg", meanings: ["Genel sağlık", "Dost canlınız olma", "Denge, barış, uyum", "Cilt güzelliği", "Kaygıyı azaltır"] },
+  { name: "Sedef", img: "img/sedef.jpg", meanings: ["Cilt hastalıkları", "Duygusal krizler", "Nezih karakter", "İyileşme gücü", "İnce düşünme"] },
+  { name: "Serpantin", img: "img/serpantin.jpg", meanings: ["Merhametli olma", "Olgunluk", "Geçmişi geride bırakma", "İç huzur"] },
+  { name: "Sodalit", img: "img/sodalit.jpg", meanings: ["Düzenli hayat", "Düzenli duygu akışı", "Kendine güvenme", "Hafızayı güçlendirme", "İlham ve sezgi"] },
+  { name: "Turkuaz", img: "img/turkuaz.jpg", meanings: ["Nazara birebir", "Dost canlısı hal", "Sorunları çözme", "Psikolojik destek", "Detoks etkisi"] },
+  { name: "Tanzanit", img: "img/tanzanit.jpg", meanings: ["Zenginlik", "Refah, cesaret", "Sorun çözme", "Özgüvenli duruş", "İlham, sevgi, şefkat"] },
+  { name: "Topaz", img: "img/topaz.jpg", meanings: ["Eğlenceli ruh hali", "Zenginlik", "Cömertlik", "Kötü anıları unutma"] },
+  { name: "Yakut", img: "img/yakut.jpg", meanings: ["Dişil enerji", "Aşkı tutuşturur", "Tutkuyu arttırır", "Adrenalin", "Cinsel güç", "Zenginlik"] },
+  { name: "Zebercet", img: "img/zebercet.jpg", meanings: ["Şefkat", "Merhamet", "Başarı, zenginlik", "Keskin zeka", "Sorumluluk"] },
+  { name: "Zümrüt", img: "img/zumrut.jpg", meanings: ["İleri görüşlülük", "Gerçekleri görme", "Aile içi huzur", "Sadakat", "Fakirliği giderir", "Zenginliği sağlar"] }
+];
+
+const container = document.getElementById("stonesContainer");
+
+// Taşları sayfaya yazdır
+function displayStones(stones) {
+  container.innerHTML = "";
+  stones.forEach(stone => {
+    const stoneDiv = document.createElement("div");
+    stoneDiv.classList.add("stone");
+
+    stoneDiv.innerHTML = `
+      <img src="${stone.img}" alt="${stone.name}" loading="lazy" />
+      <div class="stone-name">${stone.name}</div>
+      <ul class="meanings">
+        ${stone.meanings.map(m => `<li>${m}</li>`).join("")}
+      </ul>
+    `;
+    container.appendChild(stoneDiv);
+  });
+}
+
+// Arama işlemi
+function filterStones() {
+  const query = document.getElementById("searchBox").value.toLowerCase();
+  const filtered = stoneData.filter(stone => {
+    if (stone.name.toLowerCase().includes(query)) return true;
+    return stone.meanings.some(m => m.toLowerCase().includes(query));
+  });
+  displayStones(filtered);
+}
+
+// İlk açılışta tüm taşları göster
+displayStones(stoneData);
+</script>
+
+</body>
+</html>
